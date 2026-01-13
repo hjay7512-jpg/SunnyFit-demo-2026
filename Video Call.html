@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SunnyFit - Full Screen AI Vision</title>
+    <title>SunnyFit - AI Vision Mobile View</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,17 +13,27 @@
             --glass-border: rgba(255, 255, 255, 0.2);
         }
 
+        /* 外部容器：使手机框架居中 */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; font-family: 'Montserrat', sans-serif;
+            background: #222; /* 外部深灰色背景 */
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Montserrat', sans-serif;
             overflow: hidden; color: #fff;
         }
 
-        /* --- Phone Container --- */
+        /* --- 手机主容器 (限制竖屏尺寸) --- */
         .phone-frame {
-            width: 100%; max-width: 390px; height: 100%; max-height: 844px;
-            background: #000; margin: auto; position: relative;
-            overflow: hidden; display: flex; flex-direction: column;
+            width: 390px; 
+            height: 844px;
+            background: #000; 
+            position: relative;
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+            border: 8px solid #333; /* 模拟手机边框 */
+            border-radius: 40px;    /* 模拟手机圆角 */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         /* --- iOS Dynamic Island --- */
