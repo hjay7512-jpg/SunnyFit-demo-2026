@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SunnyFit: V14 Direct Skip</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { red: '#EE4343', blue: '#31426D', beige: '#F6E2CF', green: '#2BA471' },
+                        bg: { page: '#FFFBF7', card: '#FFFFFF', neutral: '#F5F7FA', dark: '#1A1A1A' },
+                        text: { primary: '#31426D', secondary: '#666666', inverse: '#FFFFFF' }
+                    },
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    boxShadow: {
+                        'glow': '0px 10px 30px rgba(222, 37, 41, 0.4)',
+                        'card': '0px 4px 12px rgba(0, 0, 0, 0.05)',
+                        'card-active': '0px 4px 12px rgba(49, 66, 109, 0.15)',
+                        'float-btn': '0px 10px 30px rgba(238, 67, 67, 0.3)',
+                    },
+                    animation: {
+                        'breathe': 'breathe 4s ease-in-out infinite',
+                        'heartbeat': 'heartbeat 0.8s ease-in-out infinite',
+                        'fade-up': 'fadeUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+                        'slide-in': 'slideIn 0.4s ease-out forwards',
+                        'radar': 'radarPing 2.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+                        'pop': 'pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        breathe: {
+                            '0%, 100%': { transform: 'scale(1)', filter: 'drop-shadow(0px 10px 20px rgba(222, 37, 41, 0.4))' },
+                            '50%': { transform: 'scale(1.05)', filter: 'drop-shadow(0px 15px 30px rgba(222, 37, 41, 0.6))' },
+                        },
+                        heartbeat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.08)' },
+                        },
+                        fadeUp: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideIn: {
+                            '0%': { opacity: '0', transform: 'translateX(20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        radarPing: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0.8' },
+                            '75%, 100%': { transform: 'scale(2.5)', opacity: '0' },
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.95)' },
+                            '50%': { transform: 'scale(1.02)' },
+                            '100%': { transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: #FFFBF7; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: #ffffff; border: 2px solid #EE4343; box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin-top: -10px; cursor: pointer; transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #E5E7EB; border-radius: 4px; }
+        #error-box { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ff4444; color: white; padding: 20px; z-index: 9999; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="error-box"></div>
+    <div id="root"></div>
+
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            var box = document.getElementById('error-box');
+            box.style.display = 'block';
+            box.innerText = "Demo Error: " + msg + "\nLine: " + line;
+            return false;
+        };
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ==========================================
+        // 1. 图标库 (Icons) - 完整定义防止报错
+        // ==========================================
+        const Icons = {
+            Bluetooth: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>,
+            Check: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 6 9 17l-5-5"/></svg>,
+            Loader: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>,
+            ChevronLeft: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6"/></svg>,
+            ChevronRight: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>,
+            Fire: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+            Dumbbell: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>,
+            Heart: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Activity: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            User: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Star: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+            Calendar: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>,
+            Zap: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Play: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" className={className}><polygon points="5 3 19 12 5 21 5 3"/></svg>,
+            Clock: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Skip: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
+        };
+
+        // ==========================================
+        // 2. 基础组件 (Logo, Confetti)
+        // ==========================================
+        const SunnyLogo = ({ variant = 'standard', animMode = 'breathe', className = "" }) => {
+            const colors = variant === 'splash' ? { path1: '#FFFFFF', path23: '#EE4343' } : { path1: '#EE4343', path23: '#FFFFFF' };
+            const animClass = animMode === 'heartbeat' ? 'animate-heartbeat' : (animMode === 'pop' ? 'animate-pop' : 'animate-breathe');
+            return (
+                <div className={`w-full h-full ${animClass}`}>
+                    <svg viewBox="0 0 32 32" fill="none" className={`w-full h-full drop-shadow-glow ${className}`}>
+                        <path d="M16.013 32C13.271 31.9018 10.5412 31.8755 7.87463 31.1231C3.57228 29.9252 1.23878 26.956 0.52873 22.6889C-0.165498 18.3226 -0.176144 13.8749 0.497173 9.50531C1.23001 4.58405 4.38577 1.32017 9.29472 0.537958C13.609 -0.165525 18.0077 -0.17914 22.3262 0.497619C27.7401 1.35875 30.6837 4.27187 31.513 9.76137C32.1817 14.0582 32.1521 18.4348 31.4253 22.7222C30.5207 27.9048 27.3527 30.867 22.079 31.558C20.0716 31.8176 18.0362 31.8597 16.013 32Z" fill={colors.path1} />
+                        <path d="M15.3836 6.16027C15.9406 6.15315 16.4468 6.48357 16.6646 6.99654C16.8824 7.50952 16.7687 8.10332 16.3767 8.49943C15.9848 8.89555 15.3925 9.01542 14.8774 8.80283C14.3624 8.59024 14.027 8.08735 14.0283 7.53001C14.0358 6.78206 14.636 6.1754 15.3836 6.16027Z" fill={colors.path23} />
+                        <path d="M19.6492 11.387C18.5149 11.7676 17.3455 12.0377 16.2287 12.4744C15.8322 12.6166 15.4556 12.8094 15.1084 13.0479C13.9776 13.8722 13.939 14.9315 14.9611 15.9768C15.7606 16.7959 16.7231 17.4115 17.5769 18.1586C18.9041 19.3214 18.9637 20.5245 17.7312 21.8118C16.4829 23.1255 14.905 23.9726 13.2676 24.6811C12.5908 24.974 11.8983 25.2283 11.2128 25.5002C11.0314 25.3255 10.9531 25.0694 11.0059 24.8232C12.0619 24.4117 13.0326 23.8082 13.8689 23.043C14.3759 22.5899 14.8315 22.0823 15.2276 21.5295C16.092 20.3018 16.0446 19.5722 15.0523 18.4445C14.3405 17.6412 13.5095 16.945 12.9134 16.0365C11.7317 14.2335 12.2928 12.0623 14.1722 10.9977C15.6747 10.1471 17.2876 9.58586 18.9234 9.06848C19.6106 8.85451 20.1226 9.11759 20.3259 9.7402C20.5766 10.5312 20.34 11.159 19.6492 11.387Z" fill={colors.path23} />
+                    </svg>
+                </div>
+            );
+        };
+
+        const Confetti = () => {
+            const canvasRef = useRef(null);
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const particles = [];
+                const colors = ['#EE4343', '#31426D', '#F6E2CF', '#2BA471'];
+                for(let i=0; i<80; i++) {
+                    particles.push({
+                        x: canvas.width/2, y: canvas.height/2,
+                        vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15-5,
+                        size: Math.random()*8+4, color: colors[Math.floor(Math.random()*colors.length)],
+                        life: 100, gravity: 0.2
+                    });
+                }
+                const render = () => {
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    let active = false;
+                    particles.forEach(p => {
+                        if(p.life>0){
+                            active=true; p.x+=p.vx; p.y+=p.vy; p.vy+=p.gravity; p.life-=1;
+                            ctx.fillStyle=p.color; ctx.beginPath(); ctx.rect(p.x,p.y,p.size,p.size); ctx.fill();
+                        }
+                    });
+                    if(active) requestAnimationFrame(render);
+                };
+                render();
+            }, []);
+            return <canvas ref={canvasRef} className="fixed inset-0 z-[100] pointer-events-none"/>;
+        };
+
+        // ==========================================
+        // 3. Act 5 Components
+        // ==========================================
+        const PlanPillar = ({ icon, title, text, delay }) => (
+            <div className="flex items-start mb-6 animate-fade-up opacity-0" style={{ animationDelay: delay }}>
+                <div className="w-10 h-10 rounded-full bg-brand-beige/30 flex items-center justify-center text-brand-blue shrink-0 mt-1">
+                    {icon}
+                </div>
+                <div className="ml-4">
+                    <h4 className="text-text-primary font-bold text-sm mb-1">{title}</h4>
+                    <p className="text-text-secondary text-xs leading-relaxed">{text}</p>
+                </div>
+            </div>
+        );
+
+        const CourseRecommendationCard = ({ delay }) => (
+            <div className="w-full bg-white rounded-[24px] shadow-card-active overflow-hidden mt-2 animate-fade-up opacity-0 border border-gray-100" style={{ animationDelay: delay }}>
+                <div className="h-32 bg-gradient-to-r from-brand-blue to-blue-400 relative p-4 flex items-end">
+                    <div className="absolute top-3 right-3 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] text-white font-bold">
+                        BEGINNER
+                    </div>
+                    <div className="absolute inset-0 bg-black/10"></div> 
+                    <div className="relative z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-brand-blue shadow-lg">
+                        <Icons.Play className="w-4 h-4 ml-0.5" />
+                    </div>
+                </div>
+                <div className="p-5">
+                    <h3 className="text-text-primary font-bold text-lg mb-2">15-Min Fat Burn Starter</h3>
+                    <div className="flex items-center gap-4 text-xs text-text-secondary">
+                        <div className="flex items-center gap-1"><Icons.Clock className="w-3 h-3"/> 15 min</div>
+                        <div className="flex items-center gap-1"><Icons.Fire className="w-3 h-3"/> 120 kcal</div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const HealthAdviceFlow = ({ onComplete }) => {
+            const [status, setStatus] = useState('generating'); 
+            const [headerText, setHeaderText] = useState("Generating your plan...");
+
+            useEffect(() => {
+                const t = setTimeout(() => {
+                    setStatus('ready');
+                    setHeaderText("Excellent choice. Here is your plan.");
+                }, 2000);
+                return () => clearTimeout(t);
+            }, []);
+
+            return (
+                <div className="fixed inset-0 z-50 bg-bg-page flex flex-col h-full animate-slide-in">
+                    <div className="h-[25vh] shrink-0 flex flex-col items-center justify-center px-8 bg-bg-page z-20">
+                         <div className="w-[80px] h-[80px] mb-4 transition-transform duration-300">
+                             <SunnyLogo animMode={status === 'generating' ? 'pop' : 'breathe'} />
+                         </div>
+                         <h2 className="text-[20px] font-bold text-text-primary text-center leading-tight animate-fade-up" key={headerText}>{headerText}</h2>
+                    </div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-32">
+                        {status === 'ready' && (
+                            <>
+                                <div className="bg-white rounded-[24px] p-6 shadow-card mb-6 animate-fade-up">
+                                    <h3 className="text-text-secondary text-xs uppercase tracking-wider font-bold mb-6">Your Personal Strategy</h3>
+                                    <PlanPillar icon={<Icons.Calendar className="w-5 h-5"/>} title="Frequency" text="Ride 3-4 times a week to keep metabolism high." delay="0.1s" />
+                                    <PlanPillar icon={<Icons.Dumbbell className="w-5 h-5"/>} title="Combine Strength" text="Add 2 days of strength training to burn more at rest." delay="0.2s" />
+                                    <PlanPillar icon={<Icons.Zap className="w-5 h-5"/>} title="Nutrition" text="Focus on high protein and a slight calorie deficit." delay="0.3s" />
+                                </div>
+                                <p className="text-text-secondary text-sm font-medium mb-3 animate-fade-up" style={{animationDelay:'0.5s'}}>Let's start with this session:</p>
+                                <CourseRecommendationCard delay="0.6s" />
+                            </>
+                        )}
+                        {status === 'generating' && (
+                            <div className="flex flex-col items-center justify-center h-48 opacity-50">
+                                <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        )}
+                    </div>
+                    {status === 'ready' && (
+                        <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-bg-page via-bg-page to-transparent z-30 animate-fade-up" style={{animationDelay:'0.8s'}}>
+                            <button onClick={onComplete} className="w-full py-4 bg-brand-red text-white rounded-[16px] font-bold text-lg shadow-float-btn hover:scale-[1.02] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                Get Started <Icons.ChevronRight className="w-5 h-5"/>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 4. Acts 1-4 Components
+        // ==========================================
+        const OptionCard = ({ icon, title, subtitle, onClick, index = 0 }) => (
+            <div onClick={onClick} className="w-full rounded-[20px] p-5 mb-4 flex items-center shadow-card cursor-pointer select-none border border-transparent bg-bg-card active:scale-[0.98] active:border-brand-blue active:bg-bg-neutral transition-all duration-200 opacity-0 animate-fade-up" style={{ animationDelay: `${0.2 + (index * 0.1)}s` }}>
+                <div className="w-[48px] h-[48px] bg-bg-neutral rounded-[16px] flex items-center justify-center text-[24px] shrink-0">{icon}</div>
+                <div className="ml-4 flex-grow"><h3 className="text-text-primary text-[16px] font-bold leading-snug">{title}</h3><p className="text-text-secondary text-[12px] font-medium leading-snug mt-1">{subtitle}</p></div>
+                <div className="text-brand-blue opacity-30"><Icons.ChevronRight className="w-5 h-5" /></div>
+            </div>
+        );
+
+        const DeviceCard = ({ device, status, onConnect }) => {
+            const isConnected = status === 'connected';
+            const isConnecting = status === 'connecting';
+            return (
+                <div onClick={() => status==='idle' && onConnect(device)} className={`w-full rounded-[20px] p-5 mb-4 flex items-center border transition-all duration-300 cursor-pointer animate-fade-up select-none ${isConnected ? 'bg-brand-green/10 border-brand-green ring-1 ring-brand-green animate-pop' : 'bg-white border-transparent shadow-card hover:shadow-card-active active:scale-98'}`}>
+                    <div className={`w-[48px] h-[48px] rounded-[16px] flex items-center justify-center text-[24px] shrink-0 transition-colors ${isConnected?'bg-brand-green text-white':'bg-bg-neutral text-text-primary'}`}>{isConnected ? <Icons.Check className="w-6 h-6"/> : "🚲"}</div>
+                    <div className="ml-4 flex-grow"><h3 className={`text-[16px] font-bold leading-snug transition-colors ${isConnected?'text-brand-green':'text-text-primary'}`}>{device.name}</h3><span className="text-[12px] text-text-secondary">Signal Strong</span></div>
+                    <div className="ml-2 w-8 h-8 flex items-center justify-center">{isConnecting && <Icons.Loader className="w-5 h-5 text-brand-blue animate-spin-slow"/>}</div>
+                </div>
+            );
+        };
+
+        const RadarScanner = () => (
+            <div className="relative flex items-center justify-center w-[200px] h-[200px] my-4">
+                <div className="absolute border border-brand-red/20 rounded-full w-full h-full animate-radar"></div>
+                <div className="absolute border border-brand-red/20 rounded-full w-full h-full animate-radar" style={{animationDelay:'0.8s'}}></div>
+                <div className="relative z-10 w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center text-brand-red"><Icons.Bluetooth className="w-8 h-8 opacity-80"/></div>
+            </div>
+        );
+
+        const SplashLayer = ({ onComplete }) => {
+            const [scale, setScale] = useState(0);
+            const [logoOpacity, setLogoOpacity] = useState(0);
+            useEffect(() => {
+                const t1 = setTimeout(() => setScale(40), 100);
+                const t2 = setTimeout(() => setLogoOpacity(1), 600);
+                const t3 = setTimeout(() => onComplete(), 2500);
+                return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); }
+            }, []);
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden">
+                    <div className="absolute w-12 h-12 bg-brand-red rounded-full transition-transform duration-[800ms] ease-[cubic-bezier(0.7,0,0.2,1)]" style={{ transform: `scale(${scale})` }} />
+                    <div className="relative z-10 w-24 h-24 transition-all duration-1000 ease-out" style={{ opacity: logoOpacity, transform: logoOpacity ? 'scale(1)' : 'scale(0.8)' }}>
+                        <SunnyLogo variant="splash" className="w-full h-full drop-shadow-lg" />
+                    </div>
+                </div>
+            );
+        };
+
+        const HomeScreen = ({ isVisible, onNavigate }) => {
+            const [showCards, setShowCards] = useState(false);
+            useEffect(() => { 
+                if(isVisible) { const t = setTimeout(() => setShowCards(true), 800); return () => clearTimeout(t); }
+            }, [isVisible]);
+            return (
+                <div className={`absolute inset-0 z-40 flex flex-col items-center pt-[12vh] px-6 bg-bg-page transition-opacity duration-1000 ease-out ${isVisible?'opacity-100':'opacity-0'}`}>
+                    <div className="flex flex-col items-center mb-10 w-full">
+                        <div className="w-[88px] h-[88px] mb-6"><SunnyLogo className="w-full h-full" /></div>
+                        <div className={`text-center space-y-2 transition-all duration-1000 ${isVisible?'translate-y-0 opacity-100':'translate-y-10 opacity-0'}`}>
+                            <h1 className="text-[28px] font-bold text-text-primary">Good Morning.</h1>
+                            <p className="text-[14px] text-text-secondary">Welcome to SunnyFit.</p>
+                        </div>
+                    </div>
+                    <div className={`w-full max-w-md ${showCards?'pointer-events-auto':'pointer-events-none'}`}>
+                        {showCards && [
+                            { id: "equipment", icon: "🚲", title: "Start with Equipment", route: "device_flow" },
+                            { id: "course", icon: "🔎", title: "Find a Course", route: "course" },
+                            { id: "guest", icon: "👀", title: "Just Browsing", route: "guest" }
+                        ].map((item, idx) => <OptionCard key={item.id} icon={item.icon} title={item.title} subtitle="Tap to continue" onClick={()=>onNavigate(item.route)} index={idx}/>)}
+                    </div>
+                </div>
+            );
+        };
+
+        const DeviceConnectionFlow = ({ onBack, onComplete }) => {
+            const [stage, setStage] = useState('check');
+            const [showModal, setShowModal] = useState(false);
+            const [isFound, setIsFound] = useState(false);
+            const [connState, setConnState] = useState('idle');
+            
+            useEffect(() => { const t = setTimeout(() => setShowModal(true), 500); return () => clearTimeout(t); }, []);
+            const handleAllow = () => { setShowModal(false); setStage('scan'); setTimeout(() => setIsFound(true), 2000); };
+            const handleConnect = () => { setConnState('connecting'); setTimeout(() => { setConnState('connected'); setTimeout(onComplete, 1200); }, 1500); };
+
+            return (
+                <div className="absolute inset-0 z-50 bg-bg-page flex flex-col animate-slide-in">
+                    <div className="px-6 pt-10 pb-4 flex items-center">
+                        <button onClick={onBack} className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-brand-blue"><Icons.ChevronLeft className="w-6 h-6"/></button>
+                        <h2 className="flex-1 text-center text-[16px] font-bold text-text-primary mr-10">{connState==='connected'?"Connected!":"Searching..."}</h2>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center pt-8 px-6">
+                        <div className={`transition-all duration-500 ${connState==='connected'?'scale-75 opacity-0 h-0':'scale-100 opacity-100'}`}><RadarScanner /></div>
+                        {isFound && <div className="w-full max-w-md mt-4"><DeviceCard device={{name:'Sunny Bike B100'}} status={connState} onConnect={handleConnect}/></div>}
+                    </div>
+                    {showModal && (
+                        <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-6 animate-fade-up">
+                            <div className="bg-white/95 w-[280px] rounded-[14px] overflow-hidden shadow-2xl backdrop-blur-xl text-center">
+                                <div className="p-5 pb-4"><h3 className="text-[17px] font-semibold mb-1">Bluetooth Permission</h3><p className="text-[13px] opacity-80">Allow SunnyFit to connect.</p></div>
+                                <div className="border-t border-gray-300/50 flex text-[17px]"><button onClick={()=>setShowModal(false)} className="flex-1 py-3 text-blue-500 border-r">Deny</button><button onClick={handleAllow} className="flex-1 py-3 text-blue-500 font-bold">Allow</button></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const AIOnboardingFlow = ({ onComplete }) => {
+            const [step, setStep] = useState('seat'); // 🟢 Direct to Seat
+            const [headerText, setHeaderText] = useState("Let's adjust the seat height."); 
+            const [logoMode, setLogoMode] = useState('breathe');
+            const [cadence, setCadence] = useState(0);
+            const [resistance, setResistance] = useState(8);
+            const [isPedaling, setIsPedaling] = useState(false);
+
+            useEffect(() => {
+                let interval;
+                if(step === 'pedal') {
+                    if(isPedaling) { setLogoMode('heartbeat'); interval = setInterval(() => setCadence(p => Math.min(p+5, 80)), 100); } 
+                    else { setLogoMode('breathe'); interval = setInterval(() => setCadence(p => Math.max(p-5, 0)), 100); }
+                }
+                return () => clearInterval(interval);
+            }, [step, isPedaling]);
+
+            useEffect(() => { if(step === 'pedal' && cadence > 60) setTimeout(() => setStep('resistance'), 500); }, [cadence, step]);
+
+            const handleResChange = (val) => {
+                setResistance(val);
+                if(val > 12 && step === 'resistance') { setLogoMode('pop'); setTimeout(() => setStep('goal'), 1500); }
+            };
+
+            const handleSkip = () => {
+                setStep('goal');
+                setLogoMode('breathe');
+            };
+
+            useEffect(() => {
+                if(step === 'seat') setHeaderText("Let's adjust the seat height.");
+                if(step === 'pedal') setHeaderText("Give it a spin! I'm listening.");
+                if(step === 'resistance') setHeaderText("Try turning the knob right.");
+                if(step === 'goal') { setHeaderText("What is your main goal?"); setLogoMode('breathe'); }
+            }, [step]);
+
+            return (
+                <div className="fixed inset-0 z-50 bg-bg-page flex flex-col h-full animate-slide-in">
+                    <div className="h-[40%] flex flex-col items-center justify-center px-8 transition-all duration-500 relative">
+                         {/* Skip Button (Act 12.2 Feature) */}
+                         {(step === 'seat' || step === 'pedal' || step === 'resistance') && (
+                             <button onClick={handleSkip} className="absolute top-10 right-6 text-sm font-bold text-brand-blue opacity-50 hover:opacity-100 z-50 flex items-center">
+                                 Skip <Icons.ChevronRight className="w-4 h-4 ml-1"/>
+                             </button>
+                         )}
+
+                         <div className="w-[88px] h-[88px] mb-6 transition-transform duration-300"><SunnyLogo animMode={logoMode} /></div>
+                         <h2 className="text-[24px] font-bold text-text-primary text-center leading-tight animate-fade-up" key={headerText}>{headerText}</h2>
+                         {step === 'pedal' && <p className="text-sm text-brand-red mt-2 animate-pulse font-medium">Cadence: {cadence} RPM</p>}
+                    </div>
+                    {step === 'goal' && <Confetti />}
+                    <div className="h-[60%] w-full max-w-md mx-auto px-6 pb-10 flex flex-col justify-end">
+                        
+                        {step === 'seat' && (
+                            <div className="flex flex-col items-center animate-fade-up">
+                                <div className="w-full bg-white rounded-[24px] h-48 mb-6 shadow-card flex items-center justify-center text-8xl">💺</div>
+                                <button onClick={() => setStep('pedal')} className="w-full py-4 bg-brand-blue text-white rounded-[16px] font-bold shadow-lg active:scale-95 transition-transform">Done</button>
+                            </div>
+                        )}
+                        {step === 'pedal' && (
+                            <div className="flex flex-col items-center animate-fade-up">
+                                <div className="h-32 flex items-end justify-center gap-2 mb-8 w-full">
+                                    {[1,2,3,4,5,6,7].map(i => <div key={i} className="w-3 bg-brand-red rounded-full transition-all duration-100" style={{height: `${cadence > 0 ? 20 + Math.random()*60 : 10}%`, opacity: cadence>0?1:0.2}} />)}
+                                </div>
+                                <button onMouseDown={()=>setIsPedaling(true)} onMouseUp={()=>setIsPedaling(false)} onTouchStart={()=>setIsPedaling(true)} onTouchEnd={()=>setIsPedaling(false)} className="w-full py-5 border-2 border-brand-red text-brand-red rounded-[16px] font-bold active:bg-brand-red active:text-white transition-colors select-none">{isPedaling ? "Keep Pedaling!" : "Hold to Pedal"}</button>
+                            </div>
+                        )}
+                        {step === 'resistance' && (
+                            <div className="flex flex-col items-center animate-fade-up">
+                                <div className="mb-8 text-center"><div className="text-6xl font-bold text-text-primary tabular-nums">{resistance}</div><div className="text-sm text-text-secondary uppercase tracking-widest mt-2">Level</div></div>
+                                <div className="w-full bg-white p-6 rounded-[24px] shadow-card"><input type="range" min="1" max="20" value={resistance} onChange={(e)=>handleResChange(parseInt(e.target.value))} /><p className="text-center text-xs text-gray-400 mt-4">Slide right to simulate knob</p></div>
+                            </div>
+                        )}
+                        {step === 'goal' && (
+                            <div className="grid grid-cols-2 gap-4 animate-fade-up">
+                                {[{id:'fat',l:'Burn Fat',i:<Icons.Fire className="w-6 h-6"/>},{id:'tone',l:'Tone Muscle',i:<Icons.Dumbbell className="w-6 h-6"/>},{id:'health',l:'Stay Healthy',i:<Icons.Heart className="w-6 h-6"/>},{id:'flex',l:'Flexibility',i:<Icons.Activity className="w-6 h-6"/>}].map((g, idx) => (
+                                    <div key={g.id} onClick={onComplete} style={{animationDelay: `${idx*0.1}s`}} className="bg-bg-card p-4 rounded-[20px] h-32 flex flex-col items-center justify-center gap-3 cursor-pointer border border-transparent shadow-card hover:shadow-card-active active:border-brand-blue active:scale-95 transition-all opacity-0 animate-fade-up"><div className="text-brand-blue">{g.i}</div><span className="text-sm font-bold text-text-primary text-center">{g.l}</span></div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 5. App Root
+        // ==========================================
+        const App = () => {
+            const [appState, setAppState] = useState('launching'); 
+            const handleNav = (route) => { if(route === 'device_flow') setAppState('device_flow'); };
+            const handleDeviceDone = () => setAppState('onboarding');
+            const handleOnboardingDone = () => setAppState('advice'); 
+            const handleRegister = () => alert("Conversion Successful! Proceed to Registration.");
+
+            return (
+                <div className="relative w-full h-screen overflow-hidden bg-bg-page font-sans">
+                    {appState === 'launching' && <SplashLayer onComplete={() => setAppState('home')} />}
+                    <HomeScreen isVisible={appState === 'home'} onNavigate={handleNav} />
+                    {appState === 'device_flow' && <DeviceConnectionFlow onBack={() => setAppState('home')} onComplete={handleDeviceDone} />}
+                    {appState === 'onboarding' && <AIOnboardingFlow onComplete={handleOnboardingDone} />}
+                    {appState === 'advice' && <HealthAdviceFlow onComplete={handleRegister} />}
+                    <div onClick={() => window.location.reload()} className="fixed top-0 left-0 w-16 h-16 z-[200]" title="Reload" />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
