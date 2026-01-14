@@ -117,7 +117,7 @@
                 <div className="absolute inset-0 z-50 bg-bg-page flex flex-col animate-slide-in">
                     <div className="px-6 pt-10 pb-4 flex items-center shrink-0">
                         <button onClick={onBack} className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-brand-blue"><Icons.ChevronLeft className="w-6 h-6"/></button>
-                        <h2 className="flex-1 text-center text-[16px] font-bold text-text-primary mr-10">Connect Device</h2>
+
                     </div>
 
                     <div className="flex-1 flex flex-col items-center overflow-y-auto no-scrollbar">
@@ -186,7 +186,7 @@
                         {flowStep === 'scanning' && <button onClick={()=>setFlowStep('manual_entry')} className="w-full text-[13px] font-bold text-brand-blue underline">Can't find device?</button>}
                         {flowStep === 'manual_entry' && <button onClick={checkModel} className="w-full py-4 bg-brand-blue text-white rounded-[16px] font-bold shadow-lg active:scale-95 transition-all disabled:opacity-50" disabled={!searchModel}>Verify Device</button>}
                         {flowStep === 'check_bt' && <button onClick={()=>setFlowStep('scanning')} className="w-full py-4 bg-brand-blue text-white rounded-[16px] font-bold active:scale-95 transition-all">Retry Connection</button>}
-                        {flowStep === 'incompatible' && <button onClick={onComplete} className="w-full py-4 bg-brand-red text-white rounded-[16px] font-bold shadow-float-btn active:scale-95 transition-all">Create My Plan</button>}
+                        {flowStep === 'incompatible' && <button onClick={() => window.location.href = './Plan Create.html'} className="w-full py-4 bg-brand-red text-white rounded-[16px] font-bold shadow-float-btn active:scale-95 transition-all">Create My Plan</button>}
                     </div>
 
                     {showModal && (
