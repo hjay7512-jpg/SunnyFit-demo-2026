@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SunnyFit - Refined Flow Fix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #FFF5F7 0%, #F5F7FA 100%);
+            --card-beige: #FFF9F0;
+            --bubble-blue: #EAF2FF;
+            --brand-red: #EE4343;
+            --brand-blue: #2F3542;
+            --text-main: #2F3542;
+            --text-sub: #A4B0BE;
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.06);
+            --shadow-float: 0 15px 40px rgba(255, 71, 87, 0.3);
+        }
+
+        body { font-family: 'Montserrat', sans-serif; background-color: #ddd; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        .phone-frame {
+            width: 100%; max-width: 390px; height: 100%; max-height: 844px;
+            background: var(--bg-gradient); position: relative; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,0.15);
+        }
+
+        /* --- TOP BAR --- */
+        .top-bar { padding: 50px 24px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .streak-pill { background: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        @keyframes flame-shake { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.3) rotate(-15deg); } 75% { transform: scale(1.3) rotate(15deg); } }
+        .shake { animation: flame-shake 0.5s ease-in-out 2; }
+
+        /* --- SCROLL CONTENT --- */
+        .scroll-content { flex: 1; overflow-y: auto; padding: 16px 20px 240px; display: flex; flex-direction: column; gap: 24px; }
+        .scroll-content::-webkit-scrollbar { display: none; }
+
+        /* --- DATA CARD --- */
+        .context-card { background: var(--card-beige); border-radius: 24px; padding: 20px; box-shadow: var(--shadow-card); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .card-title { font-size: 14px; font-weight: 800; color: var(--text-main); }
+        .card-arrow { font-size: 14px; color: var(--text-sub); }
+
+        .ring-svg { width: 80px; height: 80px; transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(0,0,0,0.05); stroke-width: 6; }
+        .ring-val { fill: none; stroke-linecap: round; stroke-width: 6; transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .data-list { display: flex; flex-direction: column; gap: 6px; }
+        .data-item { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+        /* --- AI SECTION --- */
+        .ai-section { display: flex; gap: 12px; align-items: flex-start; }
+        .ai-avatar {
+            width: 44px; height: 44px; border-radius: 50%; background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
+        }
+        .ai-bubble { 
+            background: var(--bubble-blue); padding: 14px 18px; border-radius: 4px 20px 20px 20px; 
+            font-size: 13px; line-height: 1.5; color: var(--text-main); min-height: 20px; 
+            opacity: 0; transition: opacity 0.3s; white-space: pre-wrap; word-break: break-word;
+        }
+        .ai-bubble.active { opacity: 1; }
+        .word-fade { display: inline-block; opacity: 0; transform: translateY(4px); animation: wordIn 0.4s forwards; }
+        @keyframes wordIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TASK CARD --- */
+        .task-card {
+            background: white; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-card);
+            min-height: 180px; position: relative; opacity: 0; transform: translateY(20px); transition: all 0.6s ease;
+        }
+        .task-card.visible { opacity: 1; transform: translateY(0); }
+        .skeleton-shimmer {
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite linear; z-index: 2;
+        }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+        .card-content { opacity: 0; transition: opacity 0.8s ease; }
+        .card-content.reveal { opacity: 1; }
+        .card-img { height: 110px; width: 100%; background-size: cover; background-position: center; }
+        .go-btn { position: absolute; right: 20px; top: -28px; width: 56px; height: 56px; border-radius: 50%; background: var(--brand-red); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; box-shadow: var(--shadow-float); }
+
+        /* --- FIXED BOTTOM AREA --- */
+        .bottom-fixed { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, white 80%, rgba(255,255,255,0)); padding-top: 20px; }
+        .chips-row { display: flex; gap: 8px; margin: 0 20px 12px; justify-content: center; }
+        .chip { background: white; border: 1px solid #F1F2F6; padding: 8px 14px; border-radius: 20px; font-size: 10px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; }
+        .chip:active { transform: scale(0.95); }
+        
+        .input-box { margin: 0 20px 16px; background: white; border-radius: 16px; height: 52px; display: flex; align-items: center; padding: 0 16px; border: 1px solid #F1F2F6; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: border-color 0.3s; }
+        .input-box.typing { border-color: var(--brand-red); }
+        .magic-input { flex: 1; border: none; outline: none; font-size: 13px; font-family: inherit; }
+        
+        .tab-bar { height: 70px; background: white; border-top: 1px solid #F1F2F6; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        .tab-item { color: #CED6E0; font-size: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .tab-item.active { color: var(--brand-red); }
+        .tab-label { font-size: 10px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div class="top-bar">
+        <div style="font-size:20px;">☰</div>
+        <div class="streak-pill">
+            <span id="flameIcon">🔥</span> <span id="streakNum">2</span>
+        </div>
+        <div style="font-size:20px;">🔔</div>
+		<div>📅</div>
+        <div>⌚</div>
+    </div>
+
+    <div class="scroll-content">
+        <div class="context-card">
+            <div class="card-header">
+                <div class="card-title">Day 2: Endurance Improve</div>
+                <div class="card-arrow">›</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="ring-wrapper">
+                    <svg class="ring-svg">
+                        <circle cx="40" cy="40" r="36" class="ring-bg"></circle>
+                        <circle cx="40" cy="40" r="28" class="ring-bg"></circle>
+                        <circle cx="40" cy="40" r="20" class="ring-bg"></circle>
+                        <circle id="ringRed" cx="40" cy="40" r="36" class="ring-val" stroke="#FF4757" stroke-dasharray="226" stroke-dashoffset="226"></circle>
+                        <circle id="ringBlue" cx="40" cy="40" r="28" class="ring-val" stroke="#5352ED" stroke-dasharray="176" stroke-dashoffset="176"></circle>
+                        <circle id="ringYellow" cx="40" cy="40" r="20" class="ring-val" stroke="#FFA502" stroke-dasharray="126" stroke-dashoffset="126"></circle>
+                    </svg>
+                </div>
+                <div class="data-list">
+                    <div class="data-item"><div class="dot" style="background:#FF4757;"></div><span id="txtKcal">0</span>/500 kcal</div>
+                    <div class="data-item"><div class="dot" style="background:#5352ED;"></div><span id="txtMin">0</span>/45 min</div>
+                    <div class="data-item"><div class="dot" style="background:#FFA502;"></div><span id="txtWater">0</span>/8 cup</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-section">
+            <div class="ai-avatar">🤖</div>
+            <div class="ai-bubble" id="aiBubble"></div>
+        </div>
+
+        <div id="taskCard" class="task-card">
+            <div id="skeleton" class="skeleton-shimmer"></div>
+            <div id="cardContent" class="card-content">
+                <div id="taskImg" class="card-img" style="background-image: url('https://images.unsplash.com/photo-1552674605-46d536369c78?auto=format&fit=crop&w=600&q=80');"></div>
+                <div style="padding:16px; position:relative;">
+                    <div id="taskTitle" style="font-weight:800; font-size:16px;">20 Min Interval Run</div>
+                    <div id="taskMeta" style="font-size:12px; color:var(--text-sub); margin-top:4px;">🏃 Outdoor • 🔥 240 kcal</div>
+                    <div id="goBtn" class="go-btn" onclick="window.location.href='./Movement Mode.html'">GO</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-fixed">
+        <div class="chips-row">
+            <div class="chip">📸 Track Meal</div>
+            <div class="chip">⚖️ Log Weight</div>
+            <div class="chip" onclick="simulateAdjust()">📅 Adjust Plan</div>
+        </div>
+        <div class="input-box" id="inputBox" onclick="simulateAdjust()">
+            <span style="color:#FFA502; margin-right:8px;">✨</span>
+            <input type="text" id="realInput" class="magic-input" placeholder="Message AI..." readonly>
+            <span>🎙️</span>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item active">🏠<div class="tab-label">Home</div></div>
+            <div class="tab-item">💪<div class="tab-label">Workout</div></div>
+			<div class="tab-item">🏅<div class="tab-label">Challenege</div></div>
+            <div class="tab-item">👤<div class="tab-label">Social</div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    window.onload = async () => {
+        await sleep(500);
+        document.getElementById('ringRed').style.strokeDashoffset = 80;
+        document.getElementById('ringBlue').style.strokeDashoffset = 120;
+        document.getElementById('ringYellow').style.strokeDashoffset = 70;
+        
+        countTo("txtKcal", 0, 320, 1500);
+        countTo("txtMin", 0, 15, 1500);
+        countTo("txtWater", 0, 3, 1500);
+        
+        await animateValue("streakNum", 2, 3, 1000);
+        document.getElementById('flameIcon').classList.add('shake');
+        
+        await sleep(1200);
+
+        const bubble = document.getElementById('aiBubble');
+        bubble.classList.add('active');
+        await flowText("aiBubble", "Morning Alex! ☀️ Based on your recovery, I recommend a high-burn interval session today.");
+
+        const taskCard = document.getElementById('taskCard');
+        taskCard.classList.add('visible');
+        await sleep(1500); 
+        document.getElementById('skeleton').style.display = 'none';
+        document.getElementById('cardContent').classList.add('reveal');
+    };
+
+    async function simulateAdjust() {
+        const input = document.getElementById('realInput');
+        const box = document.getElementById('inputBox');
+        const bubble = document.getElementById('aiBubble');
+        const content = document.getElementById('cardContent');
+        const skeleton = document.getElementById('skeleton');
+
+        box.classList.add('typing');
+        input.value = "Too tired today...";
+        await sleep(1000);
+        
+        input.value = "";
+        box.classList.remove('typing');
+        bubble.innerHTML = "";
+        content.classList.remove('reveal');
+        skeleton.style.display = 'block';
+        
+        await flowText("aiBubble", "I understand. Let's switch to a low-impact recovery session to keep the habit going.");
+
+        setTimeout(() => {
+            document.getElementById('taskImg').style.backgroundImage = "url('https://images.unsplash.com/photo-1544367563-12123d8965cd?auto=format&fit=crop&w=600&q=80')";
+            document.getElementById('taskTitle').innerText = "20 Min Recovery Yoga";
+            document.getElementById('taskMeta').innerText = "🧘 Indoor • 🔥 80 kcal";
+            document.getElementById('goBtn').style.background = "#EE4343";
+            
+            skeleton.style.display = 'none';
+            content.classList.add('reveal');
+        }, 1000);
+    }
+
+    async function flowText(id, text) {
+        const container = document.getElementById(id);
+        container.innerHTML = "";
+        const parts = text.split(/(\s+)/); 
+        for (let i = 0; i < parts.length; i++) {
+            const span = document.createElement('span');
+            span.className = 'word-fade';
+            span.innerText = parts[i]; 
+            span.style.animationDelay = `${i * 0.05}s`;
+            container.appendChild(span);
+            await sleep(30);
+        }
+    }
+
+    function countTo(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function animateValue(id, start, end, duration) {
+        return new Promise(resolve => {
+            let obj = document.getElementById(id);
+            let startTime = null;
+            const step = (ts) => {
+                if(!startTime) startTime = ts;
+                const progress = Math.min((ts - startTime) / duration, 1);
+                obj.innerText = Math.floor(progress * (end - start) + start);
+                if(progress < 1) window.requestAnimationFrame(step);
+                else resolve();
+            };
+            window.requestAnimationFrame(step);
+        });
+    }
+</script>
+
+</body>
+</html>
