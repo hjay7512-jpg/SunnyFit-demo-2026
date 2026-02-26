@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SunnyFit - Final Pro Version</title>
+    <title>SunnyFit - Mobile Viewport Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,36 +15,36 @@
             --text-dim: #A0AEC0;
         }
 
+        /* 外层容器：居中显示手机框架 */
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #000;
+            background-color: #f0f0f0; 
             margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            color: var(--text-white);
         }
 
         /* --- 手机主容器 --- */
         .phone-frame {
-            width: 100%;
-            max-width: 390px;
-            height: 100%;
-            max-height: 844px;
+            width: 390px; 
+            height: 844px;
             background: radial-gradient(120% 100% at 50% 0%, #3E5285 0%, var(--brand-blue) 40%, var(--brand-blue-dark) 100%);
             position: relative;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
+            border: 8px solid #333; 
+            border-radius: 40px;
+            color: var(--text-white); /* 强制初始颜色为白色 */
         }
 
         /* --- iOS 标准灵动岛 --- */
         .island-container {
             position: absolute;
-            top: 10px;
+            top: 15px; 
             left: 0;
             right: 0;
             display: flex;
@@ -69,7 +69,6 @@
             position: relative;
         }
 
-        /* 灵动岛中间物理挖空 (iOS 规范) */
         .island-sensor {
             width: 50px;
             height: 24px;
@@ -83,7 +82,6 @@
         .island-left { flex: 1; font-size: 11px; font-weight: 700; color: var(--brand-red); display: flex; align-items: center; gap: 4px; }
         .island-right { flex: 1; font-size: 11px; font-weight: 700; text-align: right; }
 
-        /* 灵动岛展开通知 */
         .island-capsule.expanded {
             min-width: 340px;
             height: 64px;
@@ -109,9 +107,9 @@
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 40%);
         }
-        .tiktok-info { position: absolute; bottom: 90px; left: 20px; z-index: 101; }
+        .tiktok-info { position: absolute; bottom: 90px; left: 20px; z-index: 101; color: white !important; }
 
-        /* --- 原有 AI 气泡样式 (严格还原) --- */
+        /* --- AI 气泡 --- */
         .header-bar { padding: 50px 24px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
         .ai-wrapper { position: relative; display: flex; align-items: center; height: 48px; }
         .ai-logo-anchor { 
@@ -128,28 +126,30 @@
         .active .ai-pill { width: 170px; opacity: 1; clip-path: inset(0 0 0 0); }
         .ai-text { color: var(--text-dark); font-size: 13px; font-weight: 600; white-space: nowrap; }
 
-        /* --- 业务界面组件 --- */
+        /* --- 业务界面组件 (还原白色字体) --- */
         .foreground-ui { transition: all 0.4s ease; display: contents; }
         .minimized .foreground-ui { transform: scale(0.95); opacity: 0; pointer-events: none; }
 
-        .tool-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tool-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+        
         .visualizer-zone { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-        .main-value { font-size: 96px; font-weight: 800; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .main-value { font-size: 96px; font-weight: 800; color: white !important; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .main-label { font-size: 14px; color: var(--text-dim); letter-spacing: 2px; }
+        
         .ripple { position: absolute; width: 240px; height: 240px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); animation: ripple 4s infinite linear; }
 
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 0 40px 60px; }
         .metric-item { display: flex; flex-direction: column; align-items: center; }
-        .metric-val { font-size: 28px; font-weight: 600; }
+        .metric-val { font-size: 28px; font-weight: 600; color: white !important; } /* 强制白色 */
         .metric-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
         .controls-zone { padding-bottom: 50px; display: flex; justify-content: center; gap: 40px; }
-        .btn-control { width: 72px; height: 72px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-control { width: 72px; height: 72px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
 
-        /* --- 关键帧动画 --- */
         @keyframes ripple { 0% { transform: scale(0.6); opacity: 0; } 50% { opacity: 0.4; } 100% { transform: scale(2.2); opacity: 0; } }
         @keyframes breathe-scale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
-        .sim-btn { position: absolute; bottom: 20px; right: 20px; font-size: 10px; opacity: 0.3; color: white; border: 1px solid white; background: none; padding: 4px 8px; border-radius: 4px; z-index: 110; cursor: pointer; }
+        .sim-btn { position: absolute; bottom: 40px; right: 20px; font-size: 10px; opacity: 0.3; color: white; border: 1px solid white; background: none; padding: 4px 8px; border-radius: 4px; z-index: 110; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -225,20 +225,16 @@
 
     const msgs = ["Shoulders down, relax.", "Great rhythm!", "Keep it up!", "Breathe deeply."];
 
-    // --- 逻辑：最小化进入 TikTok 模式 ---
     function minimizeApp() {
         phoneBody.classList.add('minimized');
         setTimeout(() => {
             tiktokLayer.style.display = 'block';
             islandContainer.style.opacity = '1';
             islandContainer.style.transform = 'translateY(0)';
-            
-            // 2秒后自动展开灵动岛显示成就
             setTimeout(expandIsland, 2000);
         }, 300);
     }
 
-    // --- 逻辑：恢复前台 ---
     function restoreApp() {
         islandContainer.style.opacity = '0';
         islandContainer.style.transform = 'translateY(-20px)';
@@ -246,7 +242,6 @@
         phoneBody.classList.remove('minimized');
     }
 
-    // --- 灵动岛通知展开 ---
     function expandIsland() {
         islandCapsule.classList.add('expanded');
         setTimeout(() => {
@@ -254,14 +249,14 @@
         }, 4000);
     }
 
-    // --- 数据实时更新 ---
     setInterval(() => {
         const rpm = 70 + Math.floor(Math.random() * 8);
-        document.getElementById('valRPM').innerText = rpm;
-        document.getElementById('diRPM').innerText = rpm;
+        const rpmVal = document.getElementById('valRPM');
+        const diRPM = document.getElementById('diRPM');
+        if(rpmVal) rpmVal.innerText = rpm;
+        if(diRPM) diRPM.innerText = rpm;
     }, 1000);
 
-    // --- AI 气泡逻辑 ---
     function triggerMessage() {
         if(aiWrapper.classList.contains('active')) return;
         aiText.innerText = msgs[Math.floor(Math.random() * msgs.length)];
